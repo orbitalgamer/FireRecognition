@@ -1,0 +1,16 @@
+*.zip
+*.jpt
+*.jpg
+*.jpeg
+*.png
+*.ckpt
+*.avi
+FIRE_DATABASE_3.zip
+*.csv
+*.txt
+*.json
+*.log
+*.yaml
+wandb/*
+*.pth
+*.mp4
