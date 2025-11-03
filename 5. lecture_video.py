@@ -10,7 +10,7 @@ from time import time
 vid_url = 'burning_forest_video.mp4'
 output_video_path = 'output_video.avi'
 
-# Device (use GPU if available)
+# put to gput if avilable
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print(f"Using device: {device}")
 
@@ -21,39 +21,38 @@ model = torch.jit.load(model_path, map_location=device)
 model.to(device)
 model.eval()
 
-# Model transform
 model_transform = transforms.Compose([
     transforms.ToPILImage(),
     transforms.Resize((img_size, img_size)),
     transforms.ToTensor()
 ])
 
-# Open video
+# open video
 cap = cv2.VideoCapture(vid_url)
 if not cap.isOpened():
     print("Error opening video stream or file")
     exit()
 
-# Get video properties
+# get video info to see progressiion
 frame_count = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
 frame_width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
 frame_height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
 fps = int(cap.get(cv2.CAP_PROP_FPS))
 
-# Define the codec and create VideoWriter object
+
 fourcc = cv2.VideoWriter_fourcc(*'XVID')
 out = cv2.VideoWriter(output_video_path, fourcc, fps, (frame_width, frame_height))
 
-# Class labels
+# possible classes might need to change order 
 class_names = ['No Fire', 'Start Fire', 'Fire']
 
-# Loop through video with progress bar
+
 for _ in tqdm(range(frame_count), desc="Processing video", ncols=100):
-    ret, frame = cap.read()
+    ret, frame = cap.read() #get frame
     if not ret:
         break
 
-    # Apply model transform
+    #put it to same device to be computed
     input_tensor = model_transform(frame).unsqueeze(0).to(device)
 
     # take start time
@@ -73,7 +72,7 @@ for _ in tqdm(range(frame_count), desc="Processing video", ncols=100):
     text_y = (frame.shape[0] + text_size[1]) // 2
     cv2.putText(frame, label, (text_x, text_y), cv2.FONT_HERSHEY_SIMPLEX, 1.2, (0, 255, 0), 3)
 
-    #frame rate
+    #draw frame rate
     frame_rate = f"{1/computation_time:.1f} FPS"
 
     text_size = cv2.getTextSize(frame_rate, cv2.FONT_HERSHEY_SIMPLEX, 1, 2)[0]
